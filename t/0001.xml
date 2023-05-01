@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language>
+  <page id="1990786087" title="BW Running Costs" descr="Texts" voice="no">
+    <t id="1">BW Running Costs mod is installed</t>
+    <t id="2">Running Costs</t>
+
+    <!-- options menu -->
+    <t id="101">BW Running Costs Menu</t>
+  </page>
+</language>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="BWRunningCosts"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../extracted/libraries/md.xsd">
+  <cues>
+    <!-- <cue name="OnLuaLoaderReady">
+        <conditions>
+            <event_ui_triggered screen="'Lua_Loader'" control="'Ready'"/>
+        </conditions>
+        <actions>
+            <raise_lua_event name="'Lua_Loader.Load'" param="'extensions.bw_running_costs.ui.bw_running_costs'"/>
+        </actions>
+    </cue>
+
+    <cue name="OnLuaLoaderReadyCompleted">
+        <conditions>
+            <event_cue_completed cue="OnLuaLoaderReady"/>
+        </conditions>
+        <actions>
+            <reset_cue cue="OnLuaLoaderReady"/>
+            <reset_cue cue="this"/>
+        </actions>
+    </cue> -->
+    <cue name="RunningCostsInit">
+      <conditions>
+        <check_any>
+          <event_cue_signalled cue="md.Setup.GameStart" />
+          <event_player_created />
+          <event_cue_signalled />
+          <event_game_loaded />
+        </check_any>
+      </conditions>
+      <actions>
+        <debug_to_file name="'BWRunningCosts'" directory="'BWRunningCosts'" text="'Initializing'" />
+        <show_help duration="7s" custom="{1990786087,1}" />
+        <!-- <get_factions_by_tag tag="tag.economic" result="$all_factions" />
+        <do_for_each name="$faction" in="$all_factions">
+          <get_ware_definition result="md.$EquipmentTable.{$faction}" faction="$faction" flags="equipment" />
+        </do_for_each> -->
+        <!-- configurable variables -->
+      </actions>
+    </cue>
+  </cues>
+</mdscript>

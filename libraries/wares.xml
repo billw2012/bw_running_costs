@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<diff>
+  <add sel="/wares">
+    <!-- using dummy missile types to force new wares to be included in supply ship cargo targets -->
+    <ware id="bw_running_costs_dummy_missile" name="'bw_running_costs_dummy_missile'" description="'bw_running_costs_dummy_missile'" group="missiles" transport="equipment" volume="1" tags="equipment missile">
+      <price min="1" average="1" max="1" />
+      <production time="1" amount="1" method="default" name="'bw_running_costs_dummy_missile'">
+        <primary>
+          <ware ware="foodrations" amount="75" />
+          <ware ware="medicalsupplies" amount="45" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="paranid" name="'bw_running_costs_dummy_missile'">
+        <primary>
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="sojahusk" amount="48" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="teladi" name="'bw_running_costs_dummy_missile'">
+        <primary>
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="nostropoil" amount="38" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="split" name="'bw_running_costs_dummy_missile'">
+        <primary>
+          <ware ware="cheltmeat" amount="17" />
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="scruffinfruits" amount="23" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="terran" name="'bw_running_costs_dummy_missile'">
+        <primary>
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="terranmre" amount="38" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="boron" name="'bw_running_costs_dummy_missile'">
+        <primary>
+          <ware ware="bofu" amount="15" />
+          <ware ware="medicalsupplies" amount="33" />
+          <ware ware="water" amount="27" />
+        </primary>
+      </production>
+      <!-- not sure what to do with this one...
+      <production time="1" amount="1" method="closedloop" name="'bw_running_costs_dummy_missile'">
+        <primary>
+          <ware ware="medicalsupplies" amount="45" />
+        </primary>
+      </production> -->
+      <component ref="bw_running_costs_dummy_missile_macro" />
+      <container ref="sm_gen_pickup_equipment_01_macro" />
+      <use threshold="0.44" />
+      <owner faction="alliance" />
+      <owner faction="antigone" />
+      <owner faction="argon" />
+      <owner faction="buccaneers" />
+      <owner faction="hatikvah" />
+      <owner faction="holyorder" />
+      <owner faction="ministry" />
+      <owner faction="paranid" />
+      <owner faction="scaleplate" />
+      <owner faction="teladi" />
+      <owner faction="trinity" />
+      <!-- make sure nobody can build it -->
+      <!-- <owner faction="khaak" />
+      <restriction licence="generaluseequipment" /> -->
+    </ware>
+  </add>
+  <!-- <replace sel="//ware[@id='missile_cluster_light_mk1']">
+    <ware id="missile_cluster_light_mk1" name="{20105,6104}" description="{20105,6102}" group="missiles" transport="equipment" volume="1" tags="equipment missile">
+      <price min="680" average="800" max="920" />
+      <production time="1" amount="1" method="default" name="{20206,101}">
+        <primary>
+          <ware ware="foodrations" amount="75" />
+          <ware ware="medicalsupplies" amount="45" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="paranid" name="{20206,101}">
+        <primary>
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="sojahusk" amount="48" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="teladi" name="{20206,101}">
+        <primary>
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="nostropoil" amount="38" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="split" name="{20206,101}">
+        <primary>
+          <ware ware="cheltmeat" amount="17" />
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="scruffinfruits" amount="23" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="terran" name="{20206,101}">
+        <primary>
+          <ware ware="medicalsupplies" amount="45" />
+          <ware ware="terranmre" amount="38" />
+        </primary>
+      </production>
+      <production time="1" amount="1" method="boron" name="{20206,101}">
+        <primary>
+          <ware ware="bofu" amount="15" />
+          <ware ware="medicalsupplies" amount="33" />
+          <ware ware="water" amount="27" />
+        </primary>
+      </production>
+      <production time="2" amount="1" method="xenon" name="{20206,601}" tags="noplayerbuild">
+        <primary>
+          <ware ware="energycells" amount="6" />
+          <ware ware="ore" amount="2" />
+          <ware ware="silicon" amount="1" />
+        </primary>
+      </production>
+      <component ref="missile_cluster_light_mk1_macro" />
+      <container ref="sm_gen_pickup_equipment_01_macro" />
+      <use threshold="0.44" />
+    </ware>
+  </replace> -->
+</diff>
+
+  

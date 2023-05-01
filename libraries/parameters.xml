@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff>
+  <!-- replacing the shipupgraderesources with values copied from shipyardupgraderesources -->
+  <replace sel="//parameters/shipupgraderesources">
+    <shipupgraderesources>
+      <factor countermeasure="200" drone="120" engine="40" missile="300" mine="200" satellite="200" navbeacon="50" resourceprobe="50" lasertower="200" scanner="20" shield="80" thruster="15" turret="101" weapon="12" />
+    </shipupgraderesources>
+  </replace>
+</diff> 
