@@ -2,7 +2,7 @@
 <diff>
   <add sel="/wares">
     <!-- using dummy missile types to force new wares to be included in supply ship cargo targets -->
-    <ware id="bw_running_costs_dummy_missile" name="'bw_running_costs_dummy_missile'" description="'bw_running_costs_dummy_missile'" group="missiles" transport="equipment" volume="1" tags="equipment missile">
+    <ware id="bw_running_costs_dummy_missile" name="'bw_running_costs_dummy_missile'" description="'bw_running_costs_dummy_missile'" group="missiles" transport="equipment" volume="1" tags="equipment missile noblueprint noplayerblueprint" >
       <price min="1" average="1" max="1" />
       <production time="1" amount="1" method="default" name="'bw_running_costs_dummy_missile'">
         <primary>
@@ -49,9 +49,9 @@
         </primary>
       </production> -->
       <component ref="bw_running_costs_dummy_missile_macro" />
-      <container ref="sm_gen_pickup_equipment_01_macro" />
+      <!-- <container ref="sm_gen_pickup_equipment_01_macro" /> -->
       <use threshold="0.44" />
-      <owner faction="alliance" />
+      <!-- <owner faction="alliance" />
       <owner faction="antigone" />
       <owner faction="argon" />
       <owner faction="buccaneers" />
@@ -61,7 +61,7 @@
       <owner faction="paranid" />
       <owner faction="scaleplate" />
       <owner faction="teladi" />
-      <owner faction="trinity" />
+      <owner faction="trinity" /> -->
       <!-- make sure nobody can build it -->
       <!-- <owner faction="khaak" />
       <restriction licence="generaluseequipment" /> -->

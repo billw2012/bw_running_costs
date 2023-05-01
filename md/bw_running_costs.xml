@@ -32,11 +32,12 @@
       <actions>
         <debug_to_file name="'BWRunningCosts'" directory="'BWRunningCosts'" text="'Initializing'" />
         <show_help duration="7s" custom="{1990786087,1}" />
-        <!-- <get_factions_by_tag tag="tag.economic" result="$all_factions" />
+        <get_factions_by_tag tag="tag.economic" result="$all_factions" />
         <do_for_each name="$faction" in="$all_factions">
           <get_ware_definition result="md.$EquipmentTable.{$faction}" faction="$faction" flags="equipment" />
-        </do_for_each> -->
+        </do_for_each>
         <!-- configurable variables -->
+        <add_blueprints wares="ware.bw_running_costs_dummy_missile"/>
       </actions>
     </cue>
   </cues>
