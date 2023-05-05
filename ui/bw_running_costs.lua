@@ -863,113 +863,184 @@ ffi.cdef[[
 
 local utf8 = require("utf8")
 
-local bw_build_limits = {
-    name = "bw_build_limits",
+local bw_running_costs = {
+    name = "bw_running_costs",
 }
 
 local function init ()
-    RegisterEvent("bw_build_limits.getMissions", bw_build_limits.getMissions)
+    bw_running_costs.player64Bit = ConvertStringTo64Bit(tostring(C.GetPlayerID()))
+    DebugError("[bw_running_costs] init")
+    RegisterEvent("bw_runnings_costs.setCargoTarget", bw_running_costs.setCargoTarget)
 end
 
-function bw_build_limits.getMissionIDInfoHelper(missionID)
-	local missionGroup = C.GetMissionGroupDetails(missionID)
-	local groupID, groupName = ffi.string(missionGroup.id), ffi.string(missionGroup.name)
-	local onlineinfo = C.GetMissionOnlineInfo(missionID)
-	local onlinechapter, onlineid = ffi.string(onlineinfo.chapter), ffi.string(onlineinfo.onlineid)
-	local helpoverlayid = ffi.string(C.GetMissionHelpOverlayID(missionID))
-	local subMissions, buf = {}, {}
-	local subactive = false
-	Helper.ffiVLA(buf, "MissionID", C.GetNumMissionThreadSubMissions, C.GetMissionThreadSubMissions, missionID)
-	for _, submission in ipairs(buf) do
-		local submissionEntry = bw_build_limits.getMissionIDInfoHelper(submission)
-		table.insert(subMissions, submissionEntry)
-		if submissionEntry.active then
-			subactive = true
-		end
-	end
-	local missiondetails = C.GetMissionIDDetails(missionID)
-	local entry = {
-		["active"] = (missionID == C.GetActiveMissionID()) or subactive,
-		["name"] = ffi.string(missiondetails.missionName),
-		["description"] = ffi.string(missiondetails.missionDescription),
-		["difficulty"] = missiondetails.difficulty,
-		["missionGroup"] = { id = groupID, name = groupName },
-		["threadtype"] = ffi.string(missiondetails.threadType),
-		["maintype"] = ffi.string(missiondetails.mainType),
-		["type"] = ffi.string(missiondetails.subType),
-		["faction"] = ffi.string(missiondetails.faction),
-		["reward"] = tonumber(missiondetails.reward) / 100,
-		["rewardtext"] = ffi.string(missiondetails.rewardText),
-		["duration"] = (missiondetails.timeLeft and missiondetails.timeLeft > -1) and missiondetails.timeLeft or (missiondetails.duration or -1),
-		["ID"] = tostring(ConvertStringTo64Bit(tostring(missionID))),
-		["associatedcomponent"] = missiondetails.associatedComponent,
-		["abortable"] = missiondetails.abortable,
-		["threadMissionID"] = missiondetails.threadMissionID,
-		["subMissions"] = subMissions,
-		["onlinechapter"] = onlinechapter,
-		["onlineID"] = onlineid,
-		["activebriefingstep"] = missiondetails.activeBriefingStep,
-		["helpOverlayID"] = helpoverlayid,
-	}
-
-	return entry
-end
-
-function bw_build_limits.getMissionInfoHelper(mission)
-    local missionID, name, description, difficulty, threadtype, maintype, subtype, subtypename, faction, reward, rewardtext, _, _, _, _, _, missiontime, _, abortable, disableguidance, associatedcomponent, upkeepalertlevel, hasobjective, threadmissionid = GetMissionDetails(mission)
-    local missionid64 = ConvertIDTo64Bit(missionID)
-    local missionGroup = C.GetMissionGroupDetails(missionid64)
-    local groupID, groupName = ffi.string(missionGroup.id), ffi.string(missionGroup.name)
-    local onlineinfo = C.GetMissionOnlineInfo(missionid64)
-    local onlinechapter, onlineid = ffi.string(onlineinfo.chapter), ffi.string(onlineinfo.onlineid)
-    local helpoverlayid = ffi.string(C.GetMissionHelpOverlayID(missionid64))
-    local objectiveText, timeout, progressname, curProgress, maxProgress = GetMissionObjective(mission)
-    local subMissions, buf = {}, {}
-    local subactive = false
-    Helper.ffiVLA(buf, "MissionID", C.GetNumMissionThreadSubMissions, C.GetMissionThreadSubMissions, missionid64)
-    for _, submission in ipairs(buf) do
-        local submissionEntry = bw_build_limits.getMissionIDInfoHelper(submission)
-        table.insert(subMissions, submissionEntry)
-        if submissionEntry.active then
-            subactive = true
+function bw_running_costs.setCargoTarget(_, params)
+    local container, ware, target = string.match(params, "(.+);(.+);(.+)")
+    local target_num = tonumber(target)
+    local container64 = ConvertStringTo64Bit(tostring(tonumber(string.sub(container, 3), 16)))
+    DebugError("[bw_running_costs][setCargoTarget] called with container = " .. tostring(container) .. ", ware = " .. tostring(ware) .. ", target = " .. tostring(target))
+    if IsValidComponent (container64) then
+        DebugError("[bw_running_costs][setCargoTarget] setting buy limits")
+        -- local traderuleid = C.GetContainerTradeRuleID(container64, "buy", ware)
+        if target_num ~= 0 then
+            -- C.SetContainerTradeRule(container64, tonumber(traderuleid), "buy",  ware, true)
+            SetContainerStockLimitOverride(container64, ware, target_num)
+            C.SetContainerWareIsBuyable(container64, ware, true)
+        else
+            -- C.SetContainerTradeRule(container64, tonumber(traderuleid), "buy",  ware, false)
+            ClearContainerStockLimitOverride(container64, ware)
+            C.SetContainerWareIsBuyable(container64, ware, false)
         end
+    else
+        DebugError("[bw_running_costs][setCargoTarget] Error: container was not valid " .. tostring(params.container))
     end
-    local entry = {
-        ["active"] = (mission == GetActiveMission()) or subactive,
-        ["name"] = name,
-        ["description"] = description,
-        ["difficulty"] = difficulty,
-        ["missionGroup"] = { id = groupID, name = groupName },
-        ["threadtype"] = threadtype,
-        ["maintype"] = maintype,
-        ["type"] = subtype,
-        ["faction"] = faction,
-        ["reward"] = reward,
-        ["rewardtext"] = rewardtext,
-        ["duration"] = (timeout and timeout ~= -1) and timeout or (missiontime or -1),		-- timeout can be nil, if mission has no objective
-        ["ID"] = tostring(missionid64),
-        ["associatedcomponent"] = ConvertIDTo64Bit(associatedcomponent),
-        ["abortable"] = abortable,
-        ["threadMissionID"] = ConvertIDTo64Bit(threadmissionid) or 0,
-        ["subMissions"] = subMissions,
-        ["onlinechapter"] = onlinechapter,
-        ["onlineID"] = onlineid,
-        ["helpOverlayID"] = helpoverlayid,
-    }
-
-    return entry
 end
 
-function bw_build_limits.getMissions()
-    local missionList = {}
+-- function bw_running_costs.setCargoTarget(_, _)
+--     local params = GetNPCBlackboard(bw_running_costs.player64Bit, "$bw_runnings_costs_setCargoTarget")
+--     if params == nil then
+--         DebugError("[bw_running_costs][setCargoTarget] params nil")
+--         return
+--     end
+--     DebugError("[bw_running_costs][setCargoTarget] called with container = " .. tostring(params.container) .. ", ware = " .. tostring(params.ware) .. ", target = " .. tostring(params.target))
+--     local container64 = ConvertStringTo64Bit(tostring(params.container))
+--     if IsValidComponent (container64) then
+--         DebugError("[bw_running_costs][setCargoTarget] setting buy limits")
+--         if params.target ~= 0 then
+--             SetContainerStockLimitOverride(container64, params.ware, params.target)
+--         else
+--             ClearContainerStockLimitOverride(container64, params.ware)
+--         end
+--         -- C.SetContainerBuyLimitOverride(container64, params.ware, params.target)
+--         -- C.SetContainerWareIsBuyable(container64, params.ware, true)
+--     else
+--         DebugError("[bw_running_costs][setCargoTarget] Error: container was not valid " .. tostring(params.container))
+--     end
+-- end
 
-    local numMissions = GetNumMissions()
-    for i = 1, numMissions do
-        local entry = bw_build_limits.getMissionInfoHelper(i)
-        table.insert(missionList, entry)
-    end
+-- function bw_running_costs.setCargoTarget(_, params)
+--     local container64 = ConvertStringTo64Bit(tostring(params.container))
+--     print("[bw_running_costs][setCargoTarget] called with " .. tostring(params))
+--     if IsValidComponent (container64) then
+--         print("[bw_running_costs][setCargoTarget] setting buy limit")
+--         C.SetContainerBuyLimitOverride(container64, params.ware, params.limit)
+--         C.SetContainerWareIsBuyable(container64, params.ware, true)
+--     else
+--         print("[bw_running_costs][setCargoTarget] Error: container was not valid " .. tostring(param_table.container))
+--     end
+-- end
 
-    AddUITriggeredEvent ("bw_build_limits", "getMissionInfoHelper", missionList)
-end
+-- function bw_running_costs.setCargoTarget(_, params)
+--     DebugError("[bw_running_costs][setCargoTarget] called with " .. tostring(params))
+--     local container, ware, limit = string.match(params, "(.+);(.+);(.+)")
+--     local container64 = ConvertStringTo64Bit(container)
+--     if IsValidComponent (container64) then
+--         DebugError("[bw_running_costs][setCargoTarget] setting buy limit")
+--         C.SetContainerBuyLimitOverride(container64, ware, limit)
+--         C.SetContainerWareIsBuyable(container64, ware, true)
+--     else
+--         DebugError("[bw_running_costs][setCargoTarget] Error: container was not valid " .. container)
+--     end
+-- end
+
+-- function bw_running_costs.getMissionIDInfoHelper(missionID)
+-- 	local missionGroup = C.GetMissionGroupDetails(missionID)
+-- 	local groupID, groupName = ffi.string(missionGroup.id), ffi.string(missionGroup.name)
+-- 	local onlineinfo = C.GetMissionOnlineInfo(missionID)
+-- 	local onlinechapter, onlineid = ffi.string(onlineinfo.chapter), ffi.string(onlineinfo.onlineid)
+-- 	local helpoverlayid = ffi.string(C.GetMissionHelpOverlayID(missionID))
+-- 	local subMissions, buf = {}, {}
+-- 	local subactive = false
+-- 	Helper.ffiVLA(buf, "MissionID", C.GetNumMissionThreadSubMissions, C.GetMissionThreadSubMissions, missionID)
+-- 	for _, submission in ipairs(buf) do
+-- 		local submissionEntry = bw_running_costs.getMissionIDInfoHelper(submission)
+-- 		table.insert(subMissions, submissionEntry)
+-- 		if submissionEntry.active then
+-- 			subactive = true
+-- 		end
+-- 	end
+-- 	local missiondetails = C.GetMissionIDDetails(missionID)
+-- 	local entry = {
+-- 		["active"] = (missionID == C.GetActiveMissionID()) or subactive,
+-- 		["name"] = ffi.string(missiondetails.missionName),
+-- 		["description"] = ffi.string(missiondetails.missionDescription),
+-- 		["difficulty"] = missiondetails.difficulty,
+-- 		["missionGroup"] = { id = groupID, name = groupName },
+-- 		["threadtype"] = ffi.string(missiondetails.threadType),
+-- 		["maintype"] = ffi.string(missiondetails.mainType),
+-- 		["type"] = ffi.string(missiondetails.subType),
+-- 		["faction"] = ffi.string(missiondetails.faction),
+-- 		["reward"] = tonumber(missiondetails.reward) / 100,
+-- 		["rewardtext"] = ffi.string(missiondetails.rewardText),
+-- 		["duration"] = (missiondetails.timeLeft and missiondetails.timeLeft > -1) and missiondetails.timeLeft or (missiondetails.duration or -1),
+-- 		["ID"] = tostring(ConvertStringTo64Bit(tostring(missionID))),
+-- 		["associatedcomponent"] = missiondetails.associatedComponent,
+-- 		["abortable"] = missiondetails.abortable,
+-- 		["threadMissionID"] = missiondetails.threadMissionID,
+-- 		["subMissions"] = subMissions,
+-- 		["onlinechapter"] = onlinechapter,
+-- 		["onlineID"] = onlineid,
+-- 		["activebriefingstep"] = missiondetails.activeBriefingStep,
+-- 		["helpOverlayID"] = helpoverlayid,
+-- 	}
+
+-- 	return entry
+-- end
+
+-- function bw_running_costs.getMissionInfoHelper(mission)
+--     local missionID, name, description, difficulty, threadtype, maintype, subtype, subtypename, faction, reward, rewardtext, _, _, _, _, _, missiontime, _, abortable, disableguidance, associatedcomponent, upkeepalertlevel, hasobjective, threadmissionid = GetMissionDetails(mission)
+--     local missionid64 = ConvertIDTo64Bit(missionID)
+--     local missionGroup = C.GetMissionGroupDetails(missionid64)
+--     local groupID, groupName = ffi.string(missionGroup.id), ffi.string(missionGroup.name)
+--     local onlineinfo = C.GetMissionOnlineInfo(missionid64)
+--     local onlinechapter, onlineid = ffi.string(onlineinfo.chapter), ffi.string(onlineinfo.onlineid)
+--     local helpoverlayid = ffi.string(C.GetMissionHelpOverlayID(missionid64))
+--     local objectiveText, timeout, progressname, curProgress, maxProgress = GetMissionObjective(mission)
+--     local subMissions, buf = {}, {}
+--     local subactive = false
+--     Helper.ffiVLA(buf, "MissionID", C.GetNumMissionThreadSubMissions, C.GetMissionThreadSubMissions, missionid64)
+--     for _, submission in ipairs(buf) do
+--         local submissionEntry = bw_running_costs.getMissionIDInfoHelper(submission)
+--         table.insert(subMissions, submissionEntry)
+--         if submissionEntry.active then
+--             subactive = true
+--         end
+--     end
+--     local entry = {
+--         ["active"] = (mission == GetActiveMission()) or subactive,
+--         ["name"] = name,
+--         ["description"] = description,
+--         ["difficulty"] = difficulty,
+--         ["missionGroup"] = { id = groupID, name = groupName },
+--         ["threadtype"] = threadtype,
+--         ["maintype"] = maintype,
+--         ["type"] = subtype,
+--         ["faction"] = faction,
+--         ["reward"] = reward,
+--         ["rewardtext"] = rewardtext,
+--         ["duration"] = (timeout and timeout ~= -1) and timeout or (missiontime or -1),		-- timeout can be nil, if mission has no objective
+--         ["ID"] = tostring(missionid64),
+--         ["associatedcomponent"] = ConvertIDTo64Bit(associatedcomponent),
+--         ["abortable"] = abortable,
+--         ["threadMissionID"] = ConvertIDTo64Bit(threadmissionid) or 0,
+--         ["subMissions"] = subMissions,
+--         ["onlinechapter"] = onlinechapter,
+--         ["onlineID"] = onlineid,
+--         ["helpOverlayID"] = helpoverlayid,
+--     }
+
+--     return entry
+-- end
+
+-- function bw_running_costs.getMissions()
+--     local missionList = {}
+
+--     local numMissions = GetNumMissions()
+--     for i = 1, numMissions do
+--         local entry = bw_running_costs.getMissionInfoHelper(i)
+--         table.insert(missionList, entry)
+--     end
+
+--     AddUITriggeredEvent ("bw_running_costs", "getMissionInfoHelper", missionList)
+-- end
 
 init()

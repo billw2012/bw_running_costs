@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../extracted/libraries/diff.xsd">
+  <!-- modifying the fetched resources to include what we want -->
+  <add sel="//do_all[@exact='this.assignedcontrolled.resources.count']" pos="after">
+    <create_list name="$extended_resource_list"/>
+    <append_to_list name="$extended_resource_list" exact="ware.medicalsupplies"/>
+    <append_to_list name="$extended_resource_list" exact="ware.foodrations"/>
+    <do_for_each name="$locware" in="$extended_resource_list">
+      <set_value name="$loctargetamount" exact="this.assignedcontrolled.cargo.{$locware}.target"/>
+      <do_if value="
+          (($loctargetamount - this.assignedcontrolled.cargo.{$locware}.count) gt 0) 
+          and 
+          this.assignedcontrolled.cargo.{$locware}.free 
+          and 
+          not $unavailableresources.indexof.{$locware}">
+        <set_value name="$resources.{$locware}" exact="$loctargetamount"/>
+        <debug_text text="'%s %s'.[$resources.{$locware}, $locware]" chance="$debugchance"/>
+      </do_if>
+      <remove_value name="$loctargetamount"/>
+    </do_for_each>
+  </add>
+</diff> 

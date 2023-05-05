@@ -2,24 +2,43 @@
 <mdscript name="BWRunningCosts"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../extracted/libraries/md.xsd">
   <cues>
-    <!-- <cue name="OnLuaLoaderReady">
-        <conditions>
-            <event_ui_triggered screen="'Lua_Loader'" control="'Ready'"/>
-        </conditions>
-        <actions>
-            <raise_lua_event name="'Lua_Loader.Load'" param="'extensions.bw_running_costs.ui.bw_running_costs'"/>
-        </actions>
+    <cue name="OnLuaLoaderReady">
+      <conditions>
+        <event_ui_triggered screen="'Lua_Loader'" control="'Ready'"/>
+      </conditions>
+      <actions>
+        <debug_to_file name="'BWRunningCosts'" directory="'BWRunningCosts'" text="player.age + ' [UpdateSupplyBuy] Loading lua script'" />
+        <raise_lua_event name="'Lua_Loader.Load'" param="'extensions.bw_running_costs.ui.bw_running_costs'"/>
+      </actions>
     </cue>
 
     <cue name="OnLuaLoaderReadyCompleted">
-        <conditions>
-            <event_cue_completed cue="OnLuaLoaderReady"/>
-        </conditions>
-        <actions>
-            <reset_cue cue="OnLuaLoaderReady"/>
-            <reset_cue cue="this"/>
-        </actions>
-    </cue> -->
+      <conditions>
+        <event_cue_completed cue="OnLuaLoaderReady"/>
+      </conditions>
+      <actions>
+        <reset_cue cue="OnLuaLoaderReady"/>
+        <reset_cue cue="this"/>
+      </actions>
+    </cue>
+
+    <library name="SetCargoTarget" purpose="run_actions">
+      <params>
+        <param name="ship" />
+        <param name="ware" />
+        <param name="target_amount" />
+      </params>
+      <actions>
+        <do_if value="$ship.cargo.{$ware}.target != $target_amount">
+          <debug_to_file name="'BWRunningCosts'" directory="'BWRunningCosts'" text="player.age + ' [SetCargoTarget] setting ' + $ware + ' cargo target on ' + $ship.name + ' to ' + $target_amount" />
+          <raise_lua_event name="'bw_runnings_costs.setCargoTarget'" param="$ship + ';' + $ware.id + ';' + $target_amount"/>
+        </do_if>
+          <create_trade_offer object="$ship" ware="$ware" price="$ware.maxprice" amount="$target_amount" playeronly="true" name="$offer" />
+          <add_tradeware object="$ship" ware="$ware" />
+        <!-- <set_ship_wares_included object="" />
+        <set_equipment_wares_absolute object="" /> -->
+      </actions>
+    </library>
     <cue name="RunningCostsInit">
       <conditions>
         <check_any>
@@ -30,15 +49,29 @@
         </check_any>
       </conditions>
       <actions>
-        <debug_to_file name="'BWRunningCosts'" directory="'BWRunningCosts'" text="'Initializing'" />
+        <debug_to_file name="'BWRunningCosts'" directory="'BWRunningCosts'" text="player.age + ' [UpdateSupplyBuy] Initializing'" />
         <show_help duration="7s" custom="{1990786087,1}" />
-        <get_factions_by_tag tag="tag.economic" result="$all_factions" />
-        <do_for_each name="$faction" in="$all_factions">
-          <get_ware_definition result="md.$EquipmentTable.{$faction}" faction="$faction" flags="equipment" />
-        </do_for_each>
-        <!-- configurable variables -->
-        <add_blueprints wares="ware.bw_running_costs_dummy_missile"/>
+        <set_value name="$RationWare" exact="ware.foodrations"/>
       </actions>
+      <cues>
+        <cue name="UpdateSupplyBuy" checkinterval="10s" instantiate="true">
+          <actions>
+            <find_ship_by_true_owner faction="faction.player" space="player.galaxy" multiple="true" cansupplyships="true" groupname="$player_supply_ships"/>
+            <do_for_each name="$supply_ship" in="$player_supply_ships">
+              <run_actions ref="SetCargoTarget">
+                <param name="ship" value="$supply_ship" />
+                <param name="ware" value="ware.medicalsupplies" />
+                <param name="target_amount" value="400" />
+              </run_actions>
+              <run_actions ref="SetCargoTarget">
+                <param name="ship" value="$supply_ship" />
+                <param name="ware" value="$RationWare" />
+                <param name="target_amount" value="800" />
+              </run_actions>
+            </do_for_each>
+          </actions>
+        </cue>
+      </cues>
     </cue>
   </cues>
 </mdscript>

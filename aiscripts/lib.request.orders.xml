@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../extracted/libraries/diff.xsd">
+  <!-- modifying the fetched resources to include what we want -->
+  <add sel="//do_elseif[@value='($assignment == assignment.trade) and ($commander.type == shiptype.resupplier)']/create_order" pos="before">
+    <create_list name="$extended_resource_list"/> 
+    <do_for_each name="$resource_ware" in="$commander.resources.list">
+      <append_to_list name="$extended_resource_list" exact="$resource_ware"/>
+    </do_for_each>
+    <append_to_list name="$extended_resource_list" exact="ware.medicalsupplies"/>
+    <append_to_list name="$extended_resource_list" exact="ware.foodrations"/>
+  </add>
+  <replace sel="//do_elseif[@value='($assignment == assignment.trade) and ($commander.type == shiptype.resupplier)']/create_order">
+    <create_order object="$object" id="'TradeRoutine'" default="true">
+      <param name="warebasket" value="$extended_resource_list"/>
+      <param name="maxbuy" value="$object.pilot.skill.piloting"/>
+      <param name="maxsell" value="$object.pilot.skill.piloting"/>
+      <param name="debugchance" value="$debugchance"/>
+    </create_order>
+  </replace>
+</diff> 

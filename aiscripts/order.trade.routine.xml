@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../extracted/libraries/diff.xsd">
+  <!-- modifying the fetched resources to include what we want -->
+  <replace sel="//do_if[@value='@this.assignedcontrolled.commander.type == shiptype.resupplier']">
+    <do_if value="@this.assignedcontrolled.commander.type == shiptype.resupplier">
+      <set_value name="$loccommander" exact="this.assignedcontrolled.commander"/>
+      <create_list name="$extended_resource_list"/> 
+      <do_for_each name="$resource_ware" in="$loccommander.resources.list">
+        <append_to_list name="$extended_resource_list" exact="$resource_ware"/>
+      </do_for_each>
+      <append_to_list name="$extended_resource_list" exact="ware.medicalsupplies"/>
+      <append_to_list name="$extended_resource_list" exact="ware.foodrations"/>
+      <do_if value="$extended_resource_list.count and $extended_resource_list != $warebasket">
+        <set_value name="$warebasket" exact="$extended_resource_list"/>
+        <do_if value="@$thisorder.exists">
+          <edit_order_param order="$thisorder" param="'warebasket'" value="$warebasket"/>
+        </do_if>
+      </do_if>
+      <remove_value name="$loccommander"/>
+    </do_if>
+  </replace>
+</diff> 
